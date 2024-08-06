@@ -67,13 +67,17 @@ const DataVisualization = ({ revenueData, costData }) => {
   };
 
   const handleSourceChange = (value, type) => {
-    setSelectedSources(prev => ({ ...prev, [type]: value }));
+    setSelectedSources(prev => ({ ...prev, [type]: Array.isArray(value) ? value : [value] }));
   };
 
   return (
     <div>
       <div className="mb-4 flex space-x-4">
-        <Select onValueChange={(value) => handleSourceChange(value, 'revenue')} value={selectedSources.revenue}>
+        <Select
+          onValueChange={(value) => handleSourceChange(value, 'revenue')}
+          value={selectedSources.revenue}
+          multiple
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select Revenue Sources" />
           </SelectTrigger>
@@ -83,7 +87,11 @@ const DataVisualization = ({ revenueData, costData }) => {
             ))}
           </SelectContent>
         </Select>
-        <Select onValueChange={(value) => handleSourceChange(value, 'cost')} value={selectedSources.cost}>
+        <Select
+          onValueChange={(value) => handleSourceChange(value, 'cost')}
+          value={selectedSources.cost}
+          multiple
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select Cost Sources" />
           </SelectTrigger>
