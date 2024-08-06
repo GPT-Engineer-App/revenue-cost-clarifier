@@ -9,9 +9,18 @@ const DataVisualization = ({ revenueData, costData }) => {
   const [outliers, setOutliers] = useState({ revenue: [], cost: [] });
 
   const sources = useMemo(() => ({
-    revenue: Object.keys(revenueData[0]).filter(key => key !== 'Source' && key.trim() !== ''),
-    cost: Object.keys(costData[0]).filter(key => key !== 'Source' && key.trim() !== ''),
+    revenue: Object.keys(revenueData[0] || {}).filter(key => key !== 'Source' && key.trim() !== ''),
+    cost: Object.keys(costData[0] || {}).filter(key => key !== 'Source' && key.trim() !== ''),
   }), [revenueData, costData]);
+
+  useEffect(() => {
+    if (sources.revenue.length > 0) {
+      setSelectedSources(prev => ({ ...prev, revenue: [sources.revenue[0]] }));
+    }
+    if (sources.cost.length > 0) {
+      setSelectedSources(prev => ({ ...prev, cost: [sources.cost[0]] }));
+    }
+  }, [sources]);
 
   const prepareChartData = (data, type) => {
     return data.flatMap(row => 
@@ -74,30 +83,28 @@ const DataVisualization = ({ revenueData, costData }) => {
     <div>
       <div className="mb-4 flex space-x-4">
         <Select
-          onValueChange={(value) => handleSourceChange(value, 'revenue')}
-          value={selectedSources.revenue}
-          multiple
+          onValueChange={(value) => handleSourceChange([value], 'revenue')}
+          value={selectedSources.revenue[0] || ''}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Revenue Sources" />
+            <SelectValue placeholder="Select Revenue Source" />
           </SelectTrigger>
           <SelectContent>
             {sources.revenue.map(source => (
-              <SelectItem key={source} value={source || 'default'}>{source || 'Default'}</SelectItem>
+              <SelectItem key={source} value={source}>{source}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select
-          onValueChange={(value) => handleSourceChange(value, 'cost')}
-          value={selectedSources.cost}
-          multiple
+          onValueChange={(value) => handleSourceChange([value], 'cost')}
+          value={selectedSources.cost[0] || ''}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Cost Sources" />
+            <SelectValue placeholder="Select Cost Source" />
           </SelectTrigger>
           <SelectContent>
             {sources.cost.map(source => (
-              <SelectItem key={source} value={source || 'default'}>{source || 'Default'}</SelectItem>
+              <SelectItem key={source} value={source}>{source}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -105,21 +112,23 @@ const DataVisualization = ({ revenueData, costData }) => {
         <Button onClick={() => findOutliers(costData, 'cost')}>Find Cost Outliers</Button>
       </div>
 
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          {selectedSources.revenue.map(source => (
-            <Line key={`revenue-${source}`} type="monotone" dataKey={source} stroke="#8884d8" />
-          ))}
-          {selectedSources.cost.map(source => (
-            <Line key={`cost-${source}`} type="monotone" dataKey={source} stroke="#82ca9d" />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+      {chartData.length > 0 && (
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            {selectedSources.revenue[0] && (
+              <Line type="monotone" dataKey={selectedSources.revenue[0]} stroke="#8884d8" name="Revenue" />
+            )}
+            {selectedSources.cost[0] && (
+              <Line type="monotone" dataKey={selectedSources.cost[0]} stroke="#82ca9d" name="Cost" />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      )}
 
       {(outliers.revenue.length > 0 || outliers.cost.length > 0) && (
         <Alert className="mt-4">
