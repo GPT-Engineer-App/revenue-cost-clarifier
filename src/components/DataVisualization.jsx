@@ -9,8 +9,8 @@ const DataVisualization = ({ revenueData, costData }) => {
   const [outliers, setOutliers] = useState({ revenue: [], cost: [] });
 
   const sources = useMemo(() => ({
-    revenue: Object.keys(revenueData[0]).filter(key => key !== 'Source'),
-    cost: Object.keys(costData[0]).filter(key => key !== 'Source'),
+    revenue: Object.keys(revenueData[0]).filter(key => key !== 'Source' && key.trim() !== ''),
+    cost: Object.keys(costData[0]).filter(key => key !== 'Source' && key.trim() !== ''),
   }), [revenueData, costData]);
 
   const prepareChartData = (data, type) => {
@@ -79,7 +79,7 @@ const DataVisualization = ({ revenueData, costData }) => {
           </SelectTrigger>
           <SelectContent>
             {sources.revenue.map(source => (
-              <SelectItem key={source} value={source}>{source}</SelectItem>
+              <SelectItem key={source} value={source || 'default'}>{source || 'Default'}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -89,7 +89,7 @@ const DataVisualization = ({ revenueData, costData }) => {
           </SelectTrigger>
           <SelectContent>
             {sources.cost.map(source => (
-              <SelectItem key={source} value={source}>{source}</SelectItem>
+              <SelectItem key={source} value={source || 'default'}>{source || 'Default'}</SelectItem>
             ))}
           </SelectContent>
         </Select>
